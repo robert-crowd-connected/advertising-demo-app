@@ -16,8 +16,7 @@
 		AA48EA3B2472CED000039486 /* BLEBroadcaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */; };
 		AA48EA3D2472CF1D00039486 /* BLEScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA3C2472CF1D00039486 /* BLEScanner.swift */; };
 		AA48EA412473D95200039486 /* BroadcastPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA402473D95200039486 /* BroadcastPayload.swift */; };
-		AAA4881B247549090031413D /* CCEddystone.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA4881A247549090031413D /* CCEddystone.swift */; };
-		AAA4881D247549BC0031413D /* DispatchTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA4881C247549BC0031413D /* DispatchTimer.swift */; };
+		AAA4881F247701F00031413D /* BLEExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA4881E247701F00031413D /* BLEExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,8 +31,7 @@
 		AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEBroadcaster.swift; sourceTree = "<group>"; };
 		AA48EA3C2472CF1D00039486 /* BLEScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEScanner.swift; sourceTree = "<group>"; };
 		AA48EA402473D95200039486 /* BroadcastPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPayload.swift; sourceTree = "<group>"; };
-		AAA4881A247549090031413D /* CCEddystone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCEddystone.swift; sourceTree = "<group>"; };
-		AAA4881C247549BC0031413D /* DispatchTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchTimer.swift; sourceTree = "<group>"; };
+		AAA4881E247701F00031413D /* BLEExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,8 +70,7 @@
 				AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */,
 				AA48EA3C2472CF1D00039486 /* BLEScanner.swift */,
 				AA48EA402473D95200039486 /* BroadcastPayload.swift */,
-				AAA4881A247549090031413D /* CCEddystone.swift */,
-				AAA4881C247549BC0031413D /* DispatchTimer.swift */,
+				AAA4881E247701F00031413D /* BLEExtension.swift */,
 			);
 			path = "Advertising Demo";
 			sourceTree = "<group>";
@@ -162,13 +159,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA48EA3D2472CF1D00039486 /* BLEScanner.swift in Sources */,
-				AAA4881B247549090031413D /* CCEddystone.swift in Sources */,
 				AA48EA3B2472CED000039486 /* BLEBroadcaster.swift in Sources */,
 				AA48EA2A2472C66900039486 /* ViewController.swift in Sources */,
 				AA48EA262472C66900039486 /* AppDelegate.swift in Sources */,
+				AAA4881F247701F00031413D /* BLEExtension.swift in Sources */,
 				AA48EA412473D95200039486 /* BroadcastPayload.swift in Sources */,
 				AA48EA282472C66900039486 /* SceneDelegate.swift in Sources */,
-				AAA4881D247549BC0031413D /* DispatchTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

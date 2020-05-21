@@ -12,10 +12,6 @@ import CoreBluetooth
 protocol BLEScannerDelegate {
     func updatePConnectedPeripherals(to number: Int)
     func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int?)
-    
-    func btleListener(_ listener: BLEScanner, didFind broadcastPayload: IncomingBroadcastPayload, for peripheral: CBPeripheral)
-    func btleListener(_ listener: BLEScanner, didReadRSSI RSSI: Int, for peripheral: CBPeripheral)
-    func btleListener(_ listener: BLEScanner, didReadTxPower txPower: Int, for peripheral: CBPeripheral)
 }
 
 protocol BTLEListenerStateDelegate {
@@ -28,14 +24,12 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var stateDelegate: BTLEListenerStateDelegate?
     var delegate: BLEScannerDelegate?
     
-    
     // comfortably less than the ~10s background processing time Core Bluetooth gives us when it wakes us up
     private let keepaliveInterval: TimeInterval = 8.0
     
     private var lastKeepaliveDate: Date = Date.distantPast
     private var keepaliveValue: UInt8 = 0
     private var keepaliveTimer: DispatchSourceTimer?
-    private let dateFormatter = ISO8601DateFormatter()
     
     private let queue: DispatchQueue
     
@@ -47,26 +41,18 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private var messagesReceived: Int = 0
     
-    private var seenEddystoneCache = [String : [String : AnyObject]]()
-    private var deviceIDCache = [UUID : NSData]()
-    
-    ///
-    /// How long we should go without a beacon sighting before considering it "lost". In seconds.
-    ///
-    var onLostTimeout: Double = 15.0
-    
     init(broadcaster: BLEBroadcaster, queue: DispatchQueue) {
         self.broadcaster = broadcaster
         self.queue = queue
     }
     
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
-        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
-            for peripheral in restoredPeripherals {
-                peripherals[peripheral.identifier] = peripheral
-                peripheral.delegate = self
-            }
-        }
+//        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
+//            for peripheral in restoredPeripherals {
+//                peripherals[peripheral.identifier] = peripheral
+//                peripheral.delegate = self
+//            }
+//        }
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -74,7 +60,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         
         switch central.state {
         case .poweredOn:
-            print("Central Manager update state to powered On. Start scanning")
+            print("Start scanning ...")
             
             for peripheral in peripherals.values {
                 central.connect(peripheral)
@@ -91,6 +77,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         if peripherals[peripheral.identifier] == nil || peripherals[peripheral.identifier]!.state != .connected {
+            peripherals[peripheral.identifier] = peripheral
             central.connect(peripheral)
         }
         
@@ -138,8 +125,6 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
          
         if serviceUUIDs != nil || overflowUUIDs != nil { messagesReceived += 1 } else { print("no uuis received") }
         delegate?.didReadAdvertisementData(txPower: txPower, uuids: serviceUUIDs?.count , totalMessages: messagesReceived)
-        
-        print("")
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -154,9 +139,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
 // MARK: - CBPeripheralDelegate
     
-    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-        print("Invalidate services for peripheral \(peripheral.identifier)")
-    }
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) { }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard error == nil else {
@@ -164,17 +147,8 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             return
         }
         
-        guard let services = peripheral.services, services.count > 0 else {
-            print("No services discovered for peripheral \(peripheral.identifier)")
-            return
-        }
-        
-        guard let colocatorIDService = services.colocatorIdService() else {
-            print("Colocator service not discovered for \(peripheral.identifier)")
-            return
-        }
-        
-        print("discovering characteristics for peripheral \(peripheral.identifier) with colocator service \(colocatorIDService)")
+        guard let services = peripheral.services, services.count > 0 else { return }
+        guard let colocatorIDService = services.colocatorIdService() else { return }
         
         let characteristics = [colocatorIdCharacteristicUUID, keepaliveCharacteristicUUID]
         peripheral.discoverCharacteristics(characteristics, for: colocatorIDService)
@@ -186,26 +160,15 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             return
         }
         
-        guard let characteristics = service.characteristics, characteristics.count > 0 else {
-            print("no characteristics discovered for service \(service)")
-            return
-        }
-        print("\(characteristics.count) \(characteristics.count == 1 ? "characteristic" : "characteristics") discovered for service \(service): \(characteristics)")
-        
-        
+        guard let characteristics = service.characteristics, characteristics.count > 0 else { return }
+       
         if let colocatorIdCharacteristic = characteristics.colocatorIdCharacteristic() {
-            print("reading colocatorId from colocator characteristic \(colocatorIdCharacteristic)")
             peripheral.readValue(for: colocatorIdCharacteristic)
             peripheral.setNotifyValue(true, for: colocatorIdCharacteristic)
-        } else {
-            print("colocatorid characteristic not discovered for peripheral \(peripheral.identifier)")
         }
         
         if let keepaliveCharacteristic = characteristics.keepaliveCharacteristic() {
-            print("subscribing to keepalive characteristic \(keepaliveCharacteristic)")
             peripheral.setNotifyValue(true, for: keepaliveCharacteristic)
-        } else {
-            print("keepalive characteristic not discovered for peripheral \(peripheral.identifier)")
         }
     }
     
@@ -218,12 +181,11 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         switch characteristic.value {
             
         case (let data?) where characteristic.uuid == colocatorIdCharacteristicUUID:
-//            if data.count == BroadcastPayload.length {
-                print("read identity from peripheral \(peripheral.identifier): \(data)")
-                delegate?.btleListener(self, didFind: IncomingBroadcastPayload(data: data), for: peripheral)
-//            } else {
-//                print("no identity ready from peripheral \(peripheral.identifier)")
-//            }
+            if data.count == BroadcastPayload.length {
+                print("Received identity payload from peripheral \(peripheral.identifier): \(data)")
+            } else {
+                print("Received payload from peripheral \(peripheral.identifier)")
+            }
             peripheral.readRSSI()
             
         case (let data?) where characteristic.uuid == keepaliveCharacteristicUUID:
@@ -245,32 +207,12 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
-                
         guard error == nil else {
             print("error: \(error!)")
             return
         }
-
-        print("Read RSSI \(RSSI) for peripheral \(peripheral.identifier)")
-        
-//        delegate?.btleListener(self, didReadRSSI: RSSI.intValue, for: peripheral)
         readRSSIAndSendKeepalive()
     }
-    
-//    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-//
-//        print("Did receive read resuest \(request)")
-//
-//    }
-//
-//    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-//        print("Writing Data")
-//
-//        if let value = requests.first?.value {
-//            let val =  value.map{ String(format: "%02hhx", $0) }.joined()
-//            print(val)
-//        }
-//    }
     
     private func readRSSIAndSendKeepalive() {
         guard Date().timeIntervalSince(lastKeepaliveDate) > keepaliveInterval else {
@@ -278,7 +220,6 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             return
         }
 
-        print("reading RSSI for \(peripherals.values.count) \(peripherals.values.count == 1 ? "peripheral" : "peripherals")")
         for peripheral in peripherals.values {
             peripheral.readRSSI()
         }
@@ -296,27 +237,3 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
 }
 
-
-extension Sequence where Iterator.Element == CBService {
-    
-    func colocatorIdService() -> CBService? {
-        return first(where: {$0.uuid == colocatorServiceUUID})
-    }
-    
-}
-
-extension Sequence where Iterator.Element == CBCharacteristic {
-    
-    func colocatorIdCharacteristic() -> CBCharacteristic? {
-        return first(where: {$0.uuid == colocatorIdCharacteristicUUID})
-    }
-
-}
-
-extension Sequence where Iterator.Element == CBCharacteristic {
-    
-    func keepaliveCharacteristic() -> CBCharacteristic? {
-        return first(where: {$0.uuid == keepaliveCharacteristicUUID})
-    }
-
-}

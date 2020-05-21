@@ -11,7 +11,7 @@ import CommonCrypto
 
 class BroadcastPayloadGenerator {
     
-    static let broadcastId = "Mock broadcast ID output".data(using: .utf8)!
+    static let broadcastId = "broadcast".data(using: .utf8)!
     
     func broadcastPayload() -> BroadcastPayload? {
         return BroadcastPayload(messageData: BroadcastPayloadGenerator.broadcastId)
@@ -19,7 +19,7 @@ class BroadcastPayloadGenerator {
 }
 
 struct BroadcastPayload {
-    static let ukISO3166CountryCode: Int16 = 826
+    static let length: Int = 14
     
     let txPower: Int8 = 0
     let messageData: Data
@@ -27,7 +27,6 @@ struct BroadcastPayload {
     func data(txDate: Date = Date()) -> Data {
         var payload = Data()
         
-        payload.append(BroadcastPayload.ukISO3166CountryCode.networkByteOrderData)
         payload.append(messageData)
         payload.append(txPower.networkByteOrderData)
         payload.append(Int32(txDate.timeIntervalSince1970).networkByteOrderData)
@@ -37,38 +36,16 @@ struct BroadcastPayload {
 }
 
 struct IncomingBroadcastPayload: Equatable, Codable {
-    let countryCode: Int16
     let cryptogram: Data
     let txPower: Int8
     let transmissionTime: Int32
     
     init(data: Data) {
-        self.countryCode = Int16(bigEndian: data.subdata(in: 0..<2).to(type: Int16.self)!)
-        self.cryptogram = data.subdata(in: 2..<108)
-        self.txPower = data.subdata(in: 108..<109).to(type: Int8.self)!
-        self.transmissionTime = Int32(bigEndian: data.subdata(in: 109..<113).to(type: Int32.self)!)
-    }
-}
-
-extension FixedWidthInteger {
-    var networkByteOrderData: Data {
-        var mutableSelf = self.bigEndian // network byte order
-        return Data(bytes: &mutableSelf, count: MemoryLayout.size(ofValue: mutableSelf))
-    }
-}
-
-// from https://stackoverflow.com/a/38024025/17294
-// CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
-extension Data {
-
-    init<T>(from value: T) {
-        self = Swift.withUnsafeBytes(of: value) { Data($0) }
-    }
-
-    func to<T>(type: T.Type) -> T? where T: ExpressibleByIntegerLiteral {
-        var value: T = 0
-        guard count >= MemoryLayout.size(ofValue: value) else { return nil }
-        _ = Swift.withUnsafeMutableBytes(of: &value, { copyBytes(to: $0)} )
-        return value
+        self.cryptogram = data.subdata(in: 0..<9)
+        self.txPower = data.subdata(in: 9..<10).to(type: Int8.self)!
+        self.transmissionTime = Int32(bigEndian: data.subdata(in: 10..<14).to(type: Int32.self)!)
+        
+        let id = String(data: cryptogram, encoding: .utf8) ?? "undecoded"
+        print("Received broadcast payload - cryptogram \(id) txPower \(self.txPower) transmissionTime \(self.transmissionTime)")
     }
 }

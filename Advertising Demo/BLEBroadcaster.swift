@@ -47,44 +47,40 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
         
         let service = CBMutableService(type: colocatorServiceUUID, primary: true)
 
-//        identityCharacteristic = CBMutableCharacteristic(
-//            type: colocatorIdCharacteristicUUID,
-//            properties: CBCharacteristicProperties([.read, .notify]),
-//            value: nil,
-//            permissions: .readable)
-
+        identityCharacteristic = CBMutableCharacteristic(
+            type: colocatorIdCharacteristicUUID,
+            properties: CBCharacteristicProperties([.read, .notify]),
+            value: nil,
+            permissions: .readable)
         keepaliveCharacteristic = CBMutableCharacteristic(
             type: keepaliveCharacteristicUUID,
             properties: CBCharacteristicProperties([.notify]),
             value: nil,
             permissions: .readable)
 
-        service.characteristics = [keepaliveCharacteristic!]
+        service.characteristics = [identityCharacteristic!, keepaliveCharacteristic!]
         
         peripheralManager?.removeAllServices()
         peripheralManager?.add(service)
-        
-        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalName,
-                                             CBAdvertisementDataServiceUUIDsKey: [colocatorServiceUUID],
-                                             CBAdvertisementDataSolicitedServiceUUIDsKey: [colocatorServiceUUID]])
     }
     
     func sendKeepalive(value: Data) {
-        print("send keep alive")
+        print("Send keep alive")
         
         guard let peripheral = self.peripheralManager else {
-            print("peripheral shouldn't be nil")
+            print("peripheral is nil")
             return
         }
         guard let keepaliveCharacteristic = self.keepaliveCharacteristic else {
-            print("keepaliveCharacteristic shouldn't be nil")
+            print("keepaliveCharacteristic is nil")
             return
         }
         
         self.unsentCharacteristicValue = .keepalive(value: value)
+        
         let success = peripheral.updateValue(value, for: keepaliveCharacteristic, onSubscribedCentrals: nil)
         if success {
-            print("sent keepalive value: \(value.withUnsafeBytes { $0.load(as: UInt8.self) })")
+            print("Sent keepalive value: \(value.withUnsafeBytes { $0.load(as: UInt8.self) })")
             self.unsentCharacteristicValue = nil
         }
     }
@@ -115,22 +111,20 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
                     } else if characteristic.uuid == colocatorIdCharacteristicUUID {
                         print("    retaining restored identity characteristic \(characteristic)")
                         self.identityCharacteristic = (characteristic as! CBMutableCharacteristic)
-                    } else {
-                        print("    restored characteristic \(characteristic)")
                     }
                 }
             }
         }
-        
-        if let advertismentData = dict[CBPeripheralManagerRestoredStateAdvertisementDataKey] as? [String: Any] {
-            let serviceUUIDs = advertismentData[CBAdvertisementDataServiceUUIDsKey] as? [NSObject] ?? []
-            let localName = advertismentData[CBAdvertisementDataLocalNameKey] as? String ?? "missing"
-            
-            print("Restoring advertisement data:\n - Service UUIDs: \(serviceUUIDs)")
-            print(" - Local Name: \(localName)")
+    }
+    
+    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+        guard error == nil else {
+            print("error: \(error!))")
+            return
         }
         
-        print("\nPeripheral Manager \(peripheral.isAdvertising ? "is" : "is not") advertising\n")
+        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalName,
+                                             CBAdvertisementDataServiceUUIDsKey: [colocatorServiceUUID]])
     }
     
     func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
@@ -182,14 +176,5 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
         print("Peripheral Manager did receive read request. Responding to read request with \(broadcastPayload)")
         request.value = broadcastPayload
         peripheral.respond(to: request, withResult: .success)
-    }
-    
-    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        print("Writing Data")
-        
-        if let value = requests.first?.value {
-            let val =  value.map{ String(format: "%02hhx", $0) }.joined()
-            print(val)
-        }
     }
 }

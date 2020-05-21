@@ -60,11 +60,12 @@ class ViewController: UIViewController {
     @IBAction func actionStartScanning(_ sender: Any) {
         if broadcaster == nil {
             broadcaster = BLEBroadcaster(idGenerator: broadcastIdGenerator!)
-        }
-        if scanner == nil {
-            scanner = BLEScanner(broadcaster: broadcaster!, queue: queue)
+            peripheral = CBPeripheralManager(delegate: broadcaster,
+                                             queue: queue,
+                                             options: [CBPeripheralManagerOptionRestoreIdentifierKey: peripheralRestoreIdentifier])
         }
         
+        scanner = BLEScanner(broadcaster: broadcaster!, queue: queue)
         central = CBCentralManager(delegate: scanner,
                                    queue: queue,
                                    options: [CBCentralManagerScanOptionAllowDuplicatesKey: NSNumber(true),
@@ -90,8 +91,7 @@ extension ViewController: BLEScannerDelegate {
             self.txLabel.text = txPower?.description
             self.uuidsLabel.text = uuids?.description
             self.serviceDataLabel.text = totalMessages?.description
-//            print(totalMessages!)
-//            print(Date())
+            print(totalMessages!)
         }
     }
     
@@ -99,18 +99,6 @@ extension ViewController: BLEScannerDelegate {
         DispatchQueue.main.async {
             self.scanningStatusLabel.text = "Connected peripherals \(number)"
         }
-    }
-    
-    func btleListener(_ listener: BLEScanner, didFind broadcastPayload: IncomingBroadcastPayload, for peripheral: CBPeripheral) {
-        print("payload ", broadcastPayload)
-    }
-    
-    func btleListener(_ listener: BLEScanner, didReadRSSI RSSI: Int, for peripheral: CBPeripheral) {
-//        print("rssi ", RSSI)
-    }
-    
-    func btleListener(_ listener: BLEScanner, didReadTxPower txPower: Int, for peripheral: CBPeripheral) {
-//        print("tx power ", txPower)
     }
 }
 
