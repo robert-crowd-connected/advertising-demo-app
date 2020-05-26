@@ -11,7 +11,7 @@ import CoreBluetooth
 
 protocol BLEScannerDelegate {
     func updatePConnectedPeripherals(to number: Int)
-    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int?)
+    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int)
 }
 
 protocol BTLEListenerStateDelegate {
@@ -47,12 +47,13 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
-//        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
-//            for peripheral in restoredPeripherals {
-//                peripherals[peripheral.identifier] = peripheral
-//                peripheral.delegate = self
-//            }
-//        }
+        print("Scanner restore state")
+        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
+            for peripheral in restoredPeripherals {
+                peripherals[peripheral.identifier] = peripheral
+                peripheral.delegate = self
+            }
+        }
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -124,6 +125,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
          
         if serviceUUIDs != nil || overflowUUIDs != nil { messagesReceived += 1 } else { print("no uuis received") }
+        
         delegate?.didReadAdvertisementData(txPower: txPower, uuids: serviceUUIDs?.count , totalMessages: messagesReceived)
     }
     
@@ -131,6 +133,8 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         peripheral.delegate = self
         peripheral.readRSSI()
         peripheral.discoverServices([colocatorServiceUUID])
+        
+        print("connect peripheral")
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -182,9 +186,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             
         case (let data?) where characteristic.uuid == colocatorIdCharacteristicUUID:
             if data.count == BroadcastPayload.length {
-                print("Received identity payload from peripheral \(peripheral.identifier): \(data)")
-            } else {
-                print("Received payload from peripheral \(peripheral.identifier)")
+                print("Received identity payload \(data)")
             }
             peripheral.readRSSI()
             
@@ -195,7 +197,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
             
             let keepaliveValue = data.withUnsafeBytes { $0.load(as: UInt8.self) }
-            print("read keepalive value from peripheral \(peripheral.identifier): \(keepaliveValue)")
+            print("Received keepalive value \(keepaliveValue)")
             readRSSIAndSendKeepalive()
             
         case .none:
@@ -216,7 +218,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private func readRSSIAndSendKeepalive() {
         guard Date().timeIntervalSince(lastKeepaliveDate) > keepaliveInterval else {
-            print("too soon, won't send keepalive (lastKeepalive = \(lastKeepaliveDate))")
+//            print("too soon, won't send keepalive (lastKeepalive = \(lastKeepaliveDate))")
             return
         }
 
@@ -224,7 +226,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             peripheral.readRSSI()
         }
         
-        print("scheduling keepalive")
+//        print("scheduling keepalive")
         lastKeepaliveDate = Date()
         keepaliveValue = keepaliveValue &+ 1 // note "&+" overflowing add operator, this is required
         let value = Data(bytes: &self.keepaliveValue, count: MemoryLayout.size(ofValue: self.keepaliveValue))

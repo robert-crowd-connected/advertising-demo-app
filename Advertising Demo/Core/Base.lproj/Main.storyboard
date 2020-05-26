@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -17,7 +17,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xkf-6B-EV7">
-                                <rect key="frame" x="30" y="237" width="315" height="130"/>
+                                <rect key="frame" x="30" y="252" width="315" height="130"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T39-Uo-5yJ">
                                         <rect key="frame" x="235" y="70" width="60" height="40"/>
@@ -206,16 +206,81 @@
                                 <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MCZ-KJ-RRe">
+                                <rect key="frame" x="30" y="97" width="315" height="130"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="A2r-qT-Nui">
+                                        <rect key="frame" x="235" y="70" width="60" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="7hb-01-geN"/>
+                                            <constraint firstAttribute="width" constant="60" id="LpC-n5-WYi"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
+                                        <state key="normal" title="Stop">
+                                            <color key="titleColor" red="0.84313725490000002" green="0.22352941179999999" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="actionStopBeaconsScan:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MfT-YG-j3Z"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dRb-ww-O6N">
+                                        <rect key="frame" x="20" y="70" width="60" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="60" id="9nY-74-9aX"/>
+                                            <constraint firstAttribute="height" constant="40" id="f8h-yH-0Qx"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
+                                        <state key="normal" title="Start">
+                                            <color key="titleColor" red="0.84313725490000002" green="0.22352941179999999" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="actionStartBeaconsScan:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ye7-dh-BxF"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qhl-Ru-Kjt">
+                                        <rect key="frame" x="157.5" y="45" width="0.0" height="0.0"/>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="16"/>
+                                        <color key="textColor" red="0.97254901959999995" green="0.97647058819999999" blue="0.98431372549999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Beacons Scanner" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qdi-tg-nwj">
+                                        <rect key="frame" x="16" y="12" width="119.5" height="19"/>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="16"/>
+                                        <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.18039215689999999" green="0.18039215689999999" blue="0.18039215689999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="qdi-tg-nwj" firstAttribute="leading" secondItem="MCZ-KJ-RRe" secondAttribute="leading" constant="16" id="53m-m2-AwT"/>
+                                    <constraint firstItem="qhl-Ru-Kjt" firstAttribute="centerX" secondItem="MCZ-KJ-RRe" secondAttribute="centerX" id="8PJ-CD-7Zw"/>
+                                    <constraint firstItem="qhl-Ru-Kjt" firstAttribute="top" secondItem="MCZ-KJ-RRe" secondAttribute="top" constant="45" id="Lrg-BW-fM7"/>
+                                    <constraint firstItem="dRb-ww-O6N" firstAttribute="leading" secondItem="MCZ-KJ-RRe" secondAttribute="leading" constant="20" id="Vgg-m9-Izs"/>
+                                    <constraint firstAttribute="bottom" secondItem="A2r-qT-Nui" secondAttribute="bottom" constant="20" id="X6y-tm-AZi"/>
+                                    <constraint firstAttribute="bottom" secondItem="dRb-ww-O6N" secondAttribute="bottom" constant="20" id="YiC-Fi-sqg"/>
+                                    <constraint firstAttribute="trailing" secondItem="A2r-qT-Nui" secondAttribute="trailing" constant="20" id="p1l-ra-OdB"/>
+                                    <constraint firstItem="qdi-tg-nwj" firstAttribute="top" secondItem="MCZ-KJ-RRe" secondAttribute="top" constant="12" id="v5k-UU-VFW"/>
+                                    <constraint firstAttribute="height" constant="130" id="yek-rs-lPh"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="8"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="mRb-dX-w50" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="30" id="0JT-XQ-zTo"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="I8P-wz-u5U" secondAttribute="bottom" constant="30" id="5L3-qU-lUV"/>
                             <constraint firstItem="mRb-dX-w50" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="I0Y-S8-0Qg"/>
+                            <constraint firstItem="Xkf-6B-EV7" firstAttribute="top" secondItem="MCZ-KJ-RRe" secondAttribute="bottom" constant="25" id="OgX-gf-BNv"/>
                             <constraint firstAttribute="trailing" secondItem="Xkf-6B-EV7" secondAttribute="trailing" constant="30" id="PaS-pA-Q1b"/>
-                            <constraint firstItem="I8P-wz-u5U" firstAttribute="top" secondItem="Xkf-6B-EV7" secondAttribute="bottom" constant="40" id="UIr-vy-Q8I"/>
+                            <constraint firstItem="I8P-wz-u5U" firstAttribute="top" secondItem="Xkf-6B-EV7" secondAttribute="bottom" constant="25" id="UIr-vy-Q8I"/>
+                            <constraint firstItem="MCZ-KJ-RRe" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="30" id="VqR-eU-hgT"/>
                             <constraint firstItem="I8P-wz-u5U" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="30" id="WAJ-3Q-XgE"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="I8P-wz-u5U" secondAttribute="trailing" constant="30" id="XgI-6i-xcG"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="MCZ-KJ-RRe" secondAttribute="trailing" constant="30" id="eU6-Qa-snC"/>
                             <constraint firstItem="3ZH-uN-G95" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="lAJ-91-Dim"/>
                             <constraint firstItem="Xkf-6B-EV7" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="30" id="lV6-dQ-vS4"/>
                             <constraint firstItem="3ZH-uN-G95" firstAttribute="top" secondItem="mRb-dX-w50" secondAttribute="bottom" constant="8" id="xLO-LX-raQ"/>
@@ -224,6 +289,7 @@
                     </view>
                     <connections>
                         <outlet property="advertisingStatusLabel" destination="9BU-IZ-TfE" id="1TP-ut-mCv"/>
+                        <outlet property="beaconsScannerLabel" destination="qhl-Ru-Kjt" id="wC6-KO-o7c"/>
                         <outlet property="scanningStatusLabel" destination="pXC-yd-PSu" id="dA8-ZS-ELA"/>
                         <outlet property="serviceDataLabel" destination="yl3-58-90Z" id="nPs-tm-59Y"/>
                         <outlet property="txLabel" destination="pZI-h0-ntI" id="Cdq-cc-roO"/>

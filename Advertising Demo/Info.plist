@@ -24,6 +24,12 @@
 	<string>You need to turn on bluetooth so this app can understand when your phone is near another phone with this app.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>You need to turn on bluetooth so this app can understand when your phone is near another phone with this app.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Want to get location always and while in use</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Want to get location always</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Want to get location when in use</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -45,8 +51,10 @@
 	</dict>
 	<key>UIBackgroundModes</key>
 	<array>
+        <string>location</string>
 		<string>bluetooth-central</string>
 		<string>bluetooth-peripheral</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

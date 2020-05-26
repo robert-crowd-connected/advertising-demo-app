@@ -65,8 +65,6 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
     }
     
     func sendKeepalive(value: Data) {
-        print("Send keep alive")
-        
         guard let peripheral = self.peripheralManager else {
             print("peripheral is nil")
             return
@@ -81,6 +79,33 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
         let success = peripheral.updateValue(value, for: keepaliveCharacteristic, onSubscribedCentrals: nil)
         if success {
             print("Sent keepalive value: \(value.withUnsafeBytes { $0.load(as: UInt8.self) })")
+            self.unsentCharacteristicValue = nil
+        }
+    }
+    
+    func updateIdentity() {
+        guard let identityCharacteristic = self.identityCharacteristic else {
+            // This "shouldn't happen" in normal course of the code, but if you start the
+            // app with Bluetooth off and don't turn it on until registration is completed
+            // you can get here.
+            print("identity characteristic not created yet")
+            return
+        }
+        
+        guard let broadcastPayload = idGenerator.broadcastPayload()?.data() else {
+            assertionFailure("attempted to update identity without an identity")
+            return
+        }
+        
+        guard let peripheral = self.peripheralManager else {
+            assertionFailure("peripheral shouldn't be nil")
+            return
+        }
+        
+        self.unsentCharacteristicValue = .identity(value: broadcastPayload)
+        let success = peripheral.updateValue(broadcastPayload, for: identityCharacteristic, onSubscribedCentrals: nil)
+        if success {
+            print("sent identity value \(broadcastPayload)")
             self.unsentCharacteristicValue = nil
         }
     }
@@ -173,7 +198,7 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
             return
         }
         
-        print("Peripheral Manager did receive read request. Responding to read request with \(broadcastPayload)")
+//        print("Peripheral Manager did receive read request. Responding to read request with \(broadcastPayload)")
         request.value = broadcastPayload
         peripheral.respond(to: request, withResult: .success)
     }

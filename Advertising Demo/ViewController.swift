@@ -13,6 +13,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var advertisingStatusLabel: UILabel!
     @IBOutlet weak var scanningStatusLabel: UILabel!
+    @IBOutlet weak var beaconsScannerLabel: UILabel!
     
     @IBOutlet weak var txLabel: UILabel!
     @IBOutlet weak var uuidsLabel: UILabel!
@@ -21,6 +22,7 @@ class ViewController: UIViewController {
     private var central: CBCentralManager?
     private var peripheral: CBPeripheralManager?
     
+    private var beaconScanner: BluetoothBeaconsManager?
     private var broadcaster: BLEBroadcaster?
     private var scanner: BLEScanner?
     
@@ -32,12 +34,25 @@ class ViewController: UIViewController {
     let centralRestoreIdentifier: String = "ColocatorCentralRestoreIdentifier"
     let peripheralRestoreIdentifier: String = "ColocatorPeripheralRestoreIdentifier"
     
+    var changeIdentityTimer: Timer?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         broadcastIdGenerator = BroadcastPayloadGenerator()
     }
 
+    @IBAction func actionStartBeaconsScan(_ sender: Any) {
+        beaconScanner = BluetoothBeaconsManager()
+        beaconScanner?.startMonitoringRegion()
+        beaconsScannerLabel.text = "Monitoring region..."
+    }
+    
+    @IBAction func actionStopBeaconsScan(_ sender: Any) {
+        beaconScanner?.stopMonitoringRegion()
+        beaconsScannerLabel.text = "Turned Off"
+    }
+    
     @IBAction func actionStartAdvertising(_ sender: Any) {
         if broadcaster == nil {
             broadcaster = BLEBroadcaster(idGenerator: broadcastIdGenerator!)
@@ -75,6 +90,8 @@ class ViewController: UIViewController {
         scanner?.delegate = self
         scanner?.stateDelegate = self.stateObserver
         scanningStatusLabel.text = "Scanning..."
+        
+//        changeIdentityTimer = Timer.scheduledTimer(timeInterval: 100, target: self, selector: #selector(updateBroadcastID), userInfo: nil, repeats: true)
     }
     
     @IBAction func actionStopScanning(_ sender: Any) {
@@ -83,15 +100,19 @@ class ViewController: UIViewController {
         scanner = nil
         scanningStatusLabel.text = "Turned Off"
     }
+    
+    @objc private func updateBroadcastID() {
+        broadcaster?.updateIdentity()
+    }
 }
 
 extension ViewController: BLEScannerDelegate {
-    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int?) {
+    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int) {
         DispatchQueue.main.async {
             self.txLabel.text = txPower?.description
             self.uuidsLabel.text = uuids?.description
-            self.serviceDataLabel.text = totalMessages?.description
-            print(totalMessages!)
+            self.serviceDataLabel.text = totalMessages.description
+            print(totalMessages, Date())
         }
     }
     
@@ -101,7 +122,6 @@ extension ViewController: BLEScannerDelegate {
         }
     }
 }
-
 
 protocol BluetoothStateObserving: BTLEListenerStateDelegate {
     func observe(_ callback: @escaping (CBManagerState) -> Action)
