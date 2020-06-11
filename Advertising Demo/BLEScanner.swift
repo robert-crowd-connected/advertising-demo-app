@@ -33,11 +33,16 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private let queue: DispatchQueue
     
+    // Record of discovered android devices, to avoid connecting to the same Android device multiple times. Our Android code sets a Manufacturer field for this purpose.
+    private var discoveredAndroidPeriManufacturerToUUIDMap = [Data: UUID]()
+    
     var peripherals: [UUID: CBPeripheral] = [:] {
         didSet {
             delegate?.updatePConnectedPeripherals(to: peripherals.count)
         }
     }
+    
+    var peripheralsEIDs: [UUID: String] = [:]
     
     private var messagesReceived: Int = 0
     
@@ -47,13 +52,13 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
-        print("Scanner restore state")
-        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
-            for peripheral in restoredPeripherals {
-                peripherals[peripheral.identifier] = peripheral
-                peripheral.delegate = self
-            }
-        }
+//        print("Scanner restore state")
+//        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
+//            for peripheral in restoredPeripherals {
+//                peripherals[peripheral.identifier] = peripheral
+//                peripheral.delegate = self
+//            }
+//        }
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -77,64 +82,48 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if peripherals[peripheral.identifier] == nil || peripherals[peripheral.identifier]!.state != .connected {
-            peripherals[peripheral.identifier] = peripheral
-            central.connect(peripheral)
+        if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data { // Most probably Android Device
+       
+//            if !discoveredAndroidPeriManufacturerToUUIDMap.keys.contains(manufacturerData) {
+                 
+                    
+            if let deviceEID = extractEIDFromManufacturerData(manufacturerData) {
+                handleAndroidContactWith(deviceEID: deviceEID, RSSI: RSSI)
+            } else {
+                // Ignore
+                // Probably a device not advertising through Colocator
+            }
+                    
+//                peripherals[peripheral.identifier] = peripheral
+//                central.connect(peripheral)
+//
+//                discoveredAndroidPeriManufacturerToUUIDMap.updateValue(peripheral.identifier, forKey: manufacturerData)
+//            }
+            
+        } else { // Most probably iOS device. Connect to it
+           if peripherals[peripheral.identifier] == nil || peripherals[peripheral.identifier]!.state != .connected {
+                peripherals[peripheral.identifier] = peripheral
+                central.connect(peripheral)
+            }
+            
+            handleiOSContactWith(peripheral, RSSI: RSSI)
         }
         
-        let localName = advertisementData[CBAdvertisementDataLocalNameKey] as? String
-        if localName != nil {
-//            print("- Local Name \(localName!)")
-        }
+        messagesReceived += 1
+//        delegate?.didReadAdvertisementData(txPower: txPower, uuids: serviceUUIDs?.count , totalMessages: messagesReceived)
+    }
+    
+    func getEIDForPeripheral(_ peripheral: CBPeripheral) -> String? {
+         //TODO search in a dictionary of connected devices and extract the EID for the dev with peripheral.identifier
+        // THE EID will be saved after received as identitycharactersitic value
         
-        let manufData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? NSData
-        if manufData != nil {
-//            let manufString = String(decoding: manufData!, as: UTF8.self)
-//            print("- Manufacturer Data \(manufString)")
-        }
-        
-        let serviceData = advertisementData[CBAdvertisementDataServiceDataKey] as? NSData
-        if serviceData != nil {
-//            let serviceString = String(decoding: serviceData!, as: UTF8.self)
-//            print("- Service Data \(serviceString)")
-        }
-        
-        let txPower = (advertisementData[CBAdvertisementDataTxPowerLevelKey] as? NSNumber)?.intValue
-        if txPower != nil {
-//            print("- Tx Power \(txPower!)")
-        }
-        
-        let isConnectable = advertisementData[CBAdvertisementDataIsConnectable] as? Bool
-        if isConnectable != nil {
-//            print("- Is Connectable \(isConnectable!)")
-        }
-        
-        let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [NSObject]
-        if serviceUUIDs != nil {
-//            print("- Service UUIDS \(serviceUUIDs!)")
-        }
-        
-        let overflowUUIDs = advertisementData[CBAdvertisementDataOverflowServiceUUIDsKey] as? [NSObject]
-        if overflowUUIDs != nil {
-//            print("- Overflow UUIDS \(overflowUUIDs!)")
-        }
-        
-        let solicitedUUIDs = advertisementData[CBAdvertisementDataSolicitedServiceUUIDsKey] as? [NSObject]
-        if solicitedUUIDs != nil {
-//            print("- Solicited UUIDS \(solicitedUUIDs!)")
-        }
-         
-        if serviceUUIDs != nil || overflowUUIDs != nil { messagesReceived += 1 } else { print("no uuis received") }
-        
-        delegate?.didReadAdvertisementData(txPower: txPower, uuids: serviceUUIDs?.count , totalMessages: messagesReceived)
+        return peripheralsEIDs[peripheral.identifier]
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         peripheral.delegate = self
         peripheral.readRSSI()
         peripheral.discoverServices([colocatorServiceUUID])
-        
-        print("connect peripheral")
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -187,12 +176,17 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         case (let data?) where characteristic.uuid == colocatorIdCharacteristicUUID:
             if data.count == BroadcastPayload.length {
                 print("Received identity payload \(data)")
+                
+                let EIDString = String(data: data, encoding: .utf8) ?? "undecoded" //TODO updat ethis to properly decode the EID
+                peripheralsEIDs.updateValue(EIDString, forKey: peripheral.identifier)
+            } else {
+                print("Received identity payload with unexpected length\(data) ")
             }
             peripheral.readRSSI()
             
         case (let data?) where characteristic.uuid == keepaliveCharacteristicUUID:
             guard data.count == 1 else {
-                print("invalid keepalive value \(data)")
+                print("Received invalid keepalive value \(data)")
                 return
             }
             
@@ -214,11 +208,32 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             return
         }
         readRSSIAndSendKeepalive()
+        
+        handleiOSContactWith(peripheral, RSSI: RSSI)
+    }
+    
+    func handleiOSContactWith(_ peripheral: CBPeripheral, RSSI: NSNumber) {
+        let time = Date()
+        
+        if let deviceEID = getEIDForPeripheral(peripheral) {
+            print("iOS contact #\(messagesReceived) -  \(deviceEID)  \(RSSI)  \(time)")
+        } else {
+            print("No EID found for peripheral identifier \(peripheral.identifier)")
+        }
+    }
+    
+    func extractEIDFromManufacturerData(_ data: Data) -> String? {
+        let eid = data.base64EncodedString() // more complex than this for sure
+        return eid
+    }
+    
+    func handleAndroidContactWith(deviceEID: String, RSSI: NSNumber) {
+        let time = Date()
+        print("Android contact #\(messagesReceived) -  \(deviceEID)  \(RSSI)  \(time)")
     }
     
     private func readRSSIAndSendKeepalive() {
         guard Date().timeIntervalSince(lastKeepaliveDate) > keepaliveInterval else {
-//            print("too soon, won't send keepalive (lastKeepalive = \(lastKeepaliveDate))")
             return
         }
 
@@ -226,7 +241,6 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             peripheral.readRSSI()
         }
         
-//        print("scheduling keepalive")
         lastKeepaliveDate = Date()
         keepaliveValue = keepaliveValue &+ 1 // note "&+" overflowing add operator, this is required
         let value = Data(bytes: &self.keepaliveValue, count: MemoryLayout.size(ofValue: self.keepaliveValue))

@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import CoreLocation
 
 let colocatorServiceUUID = CBUUID(string: "FEAA")
 let colocatorIdCharacteristicUUID = CBUUID(string: "31AF61DB-E873-4DC0-B37D-1863AFEBD24B")
@@ -124,9 +125,9 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
         print("Peripheral Manager will restore state ...\n")
-        
+
         guard let services = dict[CBPeripheralManagerRestoredStateServicesKey] as? [CBMutableService] else { return }
-        
+
         for service in services {
             if let characteristics = service.characteristics {
                 for characteristic in characteristics {
@@ -184,8 +185,6 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        print("Did receive read resuest \(request)")
-        
         guard request.characteristic.uuid == colocatorIdCharacteristicUUID else {
             print("Peripheral Manager received a read for unexpected characteristic \(request.characteristic.uuid.uuidString)")
             return
@@ -198,7 +197,6 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
             return
         }
         
-//        print("Peripheral Manager did receive read request. Responding to read request with \(broadcastPayload)")
         request.value = broadcastPayload
         peripheral.respond(to: request, withResult: .success)
     }

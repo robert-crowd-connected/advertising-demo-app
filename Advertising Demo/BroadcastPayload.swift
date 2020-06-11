@@ -11,41 +11,34 @@ import CommonCrypto
 
 class BroadcastPayloadGenerator {
     
-    static let broadcastId = "broadcast".data(using: .utf8)!
+    
+    static let randomEID = "EID-iOS-\(getRandomString())"
+    static let generatedEID = randomEID.data(using: .utf8)!
     
     func broadcastPayload() -> BroadcastPayload? {
-        return BroadcastPayload(messageData: BroadcastPayloadGenerator.broadcastId)
+        return BroadcastPayload(EIDData: BroadcastPayloadGenerator.generatedEID)
+    }
+    
+    static func getRandomString() -> String {
+        return "\(Int.random(in: 100..<200))"
     }
 }
 
 struct BroadcastPayload {
-    static let length: Int = 14
-    
-    let txPower: Int8 = 0
-    let messageData: Data
+    static let length: Int = 11
+    let EIDData: Data
         
-    func data(txDate: Date = Date()) -> Data {
-        var payload = Data()
-        
-        payload.append(messageData)
-        payload.append(txPower.networkByteOrderData)
-        payload.append(Int32(txDate.timeIntervalSince1970).networkByteOrderData)
-        
-        return payload
+    func data() -> Data {
+        return EIDData
     }
 }
 
 struct IncomingBroadcastPayload: Equatable, Codable {
-    let cryptogram: Data
-    let txPower: Int8
-    let transmissionTime: Int32
+    let EIDData: Data
     
     init(data: Data) {
-        self.cryptogram = data.subdata(in: 0..<9)
-        self.txPower = data.subdata(in: 9..<10).to(type: Int8.self)!
-        self.transmissionTime = Int32(bigEndian: data.subdata(in: 10..<14).to(type: Int32.self)!)
-        
-        let id = String(data: cryptogram, encoding: .utf8) ?? "undecoded"
-        print("Received broadcast payload - cryptogram \(id) txPower \(self.txPower) transmissionTime \(self.transmissionTime)")
+        self.EIDData = data.subdata(in: 0..<12)
+        let EID = String(data: EIDData, encoding: .utf8) ?? "undecoded"
+        print("Received broadcast payload - EID \(EID)")
     }
 }
