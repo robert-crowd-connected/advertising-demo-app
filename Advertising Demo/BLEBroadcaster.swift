@@ -93,6 +93,9 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
             return
         }
         
+        //TODO Generate EID and put it in the broadcastPayload
+        // Delete the idgenerator or make it EID Generator
+        
         guard let broadcastPayload = idGenerator.broadcastPayload()?.data() else {
             assertionFailure("attempted to update identity without an identity")
             return

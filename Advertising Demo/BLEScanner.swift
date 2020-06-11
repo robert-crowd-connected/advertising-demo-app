@@ -11,7 +11,6 @@ import CoreBluetooth
 
 protocol BLEScannerDelegate {
     func updatePConnectedPeripherals(to number: Int)
-    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int)
 }
 
 protocol BTLEListenerStateDelegate {
@@ -33,15 +32,11 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private let queue: DispatchQueue
     
-    // Record of discovered android devices, to avoid connecting to the same Android device multiple times. Our Android code sets a Manufacturer field for this purpose.
-    private var discoveredAndroidPeriManufacturerToUUIDMap = [Data: UUID]()
-    
     var peripherals: [UUID: CBPeripheral] = [:] {
         didSet {
             delegate?.updatePConnectedPeripherals(to: peripherals.count)
         }
     }
-    
     var peripheralsEIDs: [UUID: String] = [:]
     
     private var messagesReceived: Int = 0
@@ -82,23 +77,14 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        
         if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data { // Most probably Android Device
-       
-//            if !discoveredAndroidPeriManufacturerToUUIDMap.keys.contains(manufacturerData) {
-                 
-                    
             if let deviceEID = extractEIDFromManufacturerData(manufacturerData) {
                 handleAndroidContactWith(deviceEID: deviceEID, RSSI: RSSI)
             } else {
                 // Ignore
                 // Probably a device not advertising through Colocator
             }
-                    
-//                peripherals[peripheral.identifier] = peripheral
-//                central.connect(peripheral)
-//
-//                discoveredAndroidPeriManufacturerToUUIDMap.updateValue(peripheral.identifier, forKey: manufacturerData)
-//            }
             
         } else { // Most probably iOS device. Connect to it
            if peripherals[peripheral.identifier] == nil || peripherals[peripheral.identifier]!.state != .connected {
@@ -110,13 +96,10 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
         
         messagesReceived += 1
-//        delegate?.didReadAdvertisementData(txPower: txPower, uuids: serviceUUIDs?.count , totalMessages: messagesReceived)
+        print("\(messagesReceived) - \(Date())")
     }
     
     func getEIDForPeripheral(_ peripheral: CBPeripheral) -> String? {
-         //TODO search in a dictionary of connected devices and extract the EID for the dev with peripheral.identifier
-        // THE EID will be saved after received as identitycharactersitic value
-        
         return peripheralsEIDs[peripheral.identifier]
     }
     
@@ -174,14 +157,7 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         switch characteristic.value {
             
         case (let data?) where characteristic.uuid == colocatorIdCharacteristicUUID:
-            if data.count == BroadcastPayload.length {
-                print("Received identity payload \(data)")
-                
-                let EIDString = String(data: data, encoding: .utf8) ?? "undecoded" //TODO updat ethis to properly decode the EID
-                peripheralsEIDs.updateValue(EIDString, forKey: peripheral.identifier)
-            } else {
-                print("Received identity payload with unexpected length\(data) ")
-            }
+            extractEIDFromCharacteristicData(data, peripheral: peripheral)
             peripheral.readRSSI()
             
         case (let data?) where characteristic.uuid == keepaliveCharacteristicUUID:
@@ -222,8 +198,22 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
+    func extractEIDFromCharacteristicData(_ data: Data, peripheral: CBPeripheral) {
+        if data.count == BroadcastPayload.length {
+            print("Received identity payload \(data)")
+            
+            //TODO Replace thsi with properly extraction
+            let EIDString = String(data: data, encoding: .utf8) ?? "undecoded"
+            
+            peripheralsEIDs.updateValue(EIDString, forKey: peripheral.identifier)
+        } else {
+            print("Received identity payload with unexpected length\(data) ")
+        }
+    }
+    
     func extractEIDFromManufacturerData(_ data: Data) -> String? {
-        let eid = data.base64EncodedString() // more complex than this for sure
+        //TODO Replace thsi with properly extraction
+        let eid = data.base64EncodedString()
         return eid
     }
     
