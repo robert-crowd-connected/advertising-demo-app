@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AA0C4168247D46C4003A2FAC /* BluetoothBeaconsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C4167247D46C4003A2FAC /* BluetoothBeaconsManager.swift */; };
+		AA22687D24937A7E00B21210 /* EIDKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22687C24937A7E00B21210 /* EIDKeyManager.swift */; };
 		AA48EA262472C66900039486 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA252472C66900039486 /* AppDelegate.swift */; };
 		AA48EA282472C66900039486 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA272472C66900039486 /* SceneDelegate.swift */; };
 		AA48EA2A2472C66900039486 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA292472C66900039486 /* ViewController.swift */; };
@@ -16,12 +17,12 @@
 		AA48EA322472C66C00039486 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA48EA302472C66C00039486 /* LaunchScreen.storyboard */; };
 		AA48EA3B2472CED000039486 /* BLEBroadcaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */; };
 		AA48EA3D2472CF1D00039486 /* BLEScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA3C2472CF1D00039486 /* BLEScanner.swift */; };
-		AA48EA412473D95200039486 /* BroadcastPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48EA402473D95200039486 /* BroadcastPayload.swift */; };
 		AAA4881F247701F00031413D /* BLEExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA4881E247701F00031413D /* BLEExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AA0C4167247D46C4003A2FAC /* BluetoothBeaconsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothBeaconsManager.swift; sourceTree = "<group>"; };
+		AA22687C24937A7E00B21210 /* EIDKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIDKeyManager.swift; sourceTree = "<group>"; };
 		AA48EA222472C66900039486 /* Advertising Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Advertising Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA48EA252472C66900039486 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA48EA272472C66900039486 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -32,7 +33,6 @@
 		AA48EA332472C66C00039486 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEBroadcaster.swift; sourceTree = "<group>"; };
 		AA48EA3C2472CF1D00039486 /* BLEScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEScanner.swift; sourceTree = "<group>"; };
-		AA48EA402473D95200039486 /* BroadcastPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPayload.swift; sourceTree = "<group>"; };
 		AAA4881E247701F00031413D /* BLEExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,7 +71,7 @@
 				AA48EA292472C66900039486 /* ViewController.swift */,
 				AA48EA3A2472CED000039486 /* BLEBroadcaster.swift */,
 				AA48EA3C2472CF1D00039486 /* BLEScanner.swift */,
-				AA48EA402473D95200039486 /* BroadcastPayload.swift */,
+				AA22687C24937A7E00B21210 /* EIDKeyManager.swift */,
 				AAA4881E247701F00031413D /* BLEExtension.swift */,
 				AA0C4167247D46C4003A2FAC /* BluetoothBeaconsManager.swift */,
 			);
@@ -166,8 +166,8 @@
 				AA48EA2A2472C66900039486 /* ViewController.swift in Sources */,
 				AA48EA262472C66900039486 /* AppDelegate.swift in Sources */,
 				AA0C4168247D46C4003A2FAC /* BluetoothBeaconsManager.swift in Sources */,
+				AA22687D24937A7E00B21210 /* EIDKeyManager.swift in Sources */,
 				AAA4881F247701F00031413D /* BLEExtension.swift in Sources */,
-				AA48EA412473D95200039486 /* BroadcastPayload.swift in Sources */,
 				AA48EA282472C66900039486 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

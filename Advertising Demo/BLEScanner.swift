@@ -9,10 +9,6 @@
 import Foundation
 import CoreBluetooth
 
-protocol BLEScannerDelegate {
-    func updatePConnectedPeripherals(to number: Int)
-}
-
 protocol BTLEListenerStateDelegate {
     func btleListener(_ listener: BLEScanner, didUpdateState state: CBManagerState)
 }
@@ -21,7 +17,6 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     var broadcaster: BLEBroadcaster
     var stateDelegate: BTLEListenerStateDelegate?
-    var delegate: BLEScannerDelegate?
     
     // comfortably less than the ~10s background processing time Core Bluetooth gives us when it wakes us up
     private let keepaliveInterval: TimeInterval = 8.0
@@ -32,14 +27,8 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private let queue: DispatchQueue
     
-    var peripherals: [UUID: CBPeripheral] = [:] {
-        didSet {
-            delegate?.updatePConnectedPeripherals(to: peripherals.count)
-        }
-    }
+    var peripherals: [UUID: CBPeripheral] = [:]
     var peripheralsEIDs: [UUID: String] = [:]
-    
-    private var messagesReceived: Int = 0
     
     init(broadcaster: BLEBroadcaster, queue: DispatchQueue) {
         self.broadcaster = broadcaster
@@ -61,8 +50,6 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         
         switch central.state {
         case .poweredOn:
-            print("Start scanning ...")
-            
             for peripheral in peripherals.values {
                 central.connect(peripheral)
             }
@@ -77,13 +64,11 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        
         if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data { // Most probably Android Device
             if let deviceEID = extractEIDFromManufacturerData(manufacturerData) {
                 handleAndroidContactWith(deviceEID: deviceEID, RSSI: RSSI)
             } else {
-                // Ignore
-                // Probably a device not advertising through Colocator
+                // Ignore. Probably a device not advertising through Colocator
             }
             
         } else { // Most probably iOS device. Connect to it
@@ -91,12 +76,8 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 peripherals[peripheral.identifier] = peripheral
                 central.connect(peripheral)
             }
-            
             handleiOSContactWith(peripheral, RSSI: RSSI)
         }
-        
-        messagesReceived += 1
-        print("\(messagesReceived) - \(Date())")
     }
     
     func getEIDForPeripheral(_ peripheral: CBPeripheral) -> String? {
@@ -192,34 +173,29 @@ class BLEScanner: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         let time = Date()
         
         if let deviceEID = getEIDForPeripheral(peripheral) {
-            print("iOS contact #\(messagesReceived) -  \(deviceEID)  \(RSSI)  \(time)")
+            print("iOS contact: \(deviceEID)  \(RSSI)  \(time)")
         } else {
             print("No EID found for peripheral identifier \(peripheral.identifier)")
         }
     }
     
     func extractEIDFromCharacteristicData(_ data: Data, peripheral: CBPeripheral) {
-        if data.count == BroadcastPayload.length {
-            print("Received identity payload \(data)")
-            
-            //TODO Replace thsi with properly extraction
+        if data.count == EIDKeyManager.eidLength {
             let EIDString = String(data: data, encoding: .utf8) ?? "undecoded"
-            
             peripheralsEIDs.updateValue(EIDString, forKey: peripheral.identifier)
         } else {
-            print("Received identity payload with unexpected length\(data) ")
+            print("Received identity payload with unexpected eid length\(data)")
         }
     }
     
     func extractEIDFromManufacturerData(_ data: Data) -> String? {
-        //TODO Replace thsi with properly extraction
-        let eid = data.base64EncodedString()
-        return eid
+        let eidData = data.subdata(in: 2..<18) //The EID is on 8 bytes, first is a flag (added by the OS ??)
+        return String(data: eidData, encoding: .utf8)
     }
     
     func handleAndroidContactWith(deviceEID: String, RSSI: NSNumber) {
         let time = Date()
-        print("Android contact #\(messagesReceived) -  \(deviceEID)  \(RSSI)  \(time)")
+        print("Android contact: \(deviceEID)  \(RSSI)  \(time)")
     }
     
     private func readRSSIAndSendKeepalive() {

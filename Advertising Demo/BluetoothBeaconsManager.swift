@@ -23,7 +23,6 @@ class BluetoothBeaconsManager: NSObject, CLLocationManagerDelegate {
         region.notifyEntryStateOnDisplay = true
         locationManager.startMonitoring(for: region)
         locationManager.startRangingBeacons(in: region)
-        locationManager.startUpdatingLocation()
     }
     
     func stopMonitoringRegion() {
@@ -33,15 +32,5 @@ class BluetoothBeaconsManager: NSObject, CLLocationManagerDelegate {
     }
     
     // BeaconScannerDelegate
-    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
-//        if beacons.isEmpty {
-//            print("Did range beacons empty")
-//        } else {
-//            print("Beacon detected \(beacons[0])")
-//        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        print("Location update")
-    }
+    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) { }
 }

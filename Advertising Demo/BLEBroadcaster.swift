@@ -20,7 +20,6 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
     private let restoreIdentifierKey = "com.colocator.peripheral"
     
     var peripheralManager: CBPeripheralManager?
-    let idGenerator: BroadcastPayloadGenerator
     
     enum UnsentCharacteristicValue {
         case keepalive(value: Data)
@@ -30,9 +29,7 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
     var keepaliveCharacteristic: CBMutableCharacteristic?
     var identityCharacteristic: CBMutableCharacteristic?
     
-    init(idGenerator: BroadcastPayloadGenerator) {
-        self.idGenerator = idGenerator
-    }
+//    init() { }
     
     func start() {
         print("Start broadcasting ...")
@@ -93,11 +90,8 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
             return
         }
         
-        //TODO Generate EID and put it in the broadcastPayload
-        // Delete the idgenerator or make it EID Generator
-        
-        guard let broadcastPayload = idGenerator.broadcastPayload()?.data() else {
-            assertionFailure("attempted to update identity without an identity")
+        guard let broadcastPayload = EIDKeyManager.generateEIDData() else {
+            print("Failed to generate EID")
             return
         }
         
@@ -193,7 +187,7 @@ class BLEBroadcaster: NSObject, CBPeripheralManagerDelegate  {
             return
         }
         
-        guard let broadcastPayload = idGenerator.broadcastPayload()?.data() else {
+        guard let broadcastPayload = EIDKeyManager.generateEIDData() else {
             print("Peripheral Manager did receive read request. Responding to read request with empty payload")
             request.value = Data()
             peripheral.respond(to: request, withResult: .success)

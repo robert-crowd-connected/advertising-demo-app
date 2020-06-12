@@ -26,8 +26,6 @@ class ViewController: UIViewController {
     private var broadcaster: BLEBroadcaster?
     private var scanner: BLEScanner?
     
-    public var broadcastIdGenerator: BroadcastPayloadGenerator?
-    
     private var queue = DispatchQueue(label: "ColocatorBroadcaster")
     public private(set) var stateObserver: BluetoothStateObserving = BluetoothStateObserver(initialState: .unknown)
     
@@ -39,7 +37,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        broadcastIdGenerator = BroadcastPayloadGenerator()
     }
 
     @IBAction func actionStartBeaconsScan(_ sender: Any) {
@@ -54,27 +51,17 @@ class ViewController: UIViewController {
     }
     
     @IBAction func actionStartAdvertising(_ sender: Any) {
-        if broadcaster == nil {
-            broadcaster = BLEBroadcaster(idGenerator: broadcastIdGenerator!)
-        }
-        peripheral = CBPeripheralManager(delegate: broadcaster,
-                                         queue: queue,
-                                         options: [CBPeripheralManagerOptionRestoreIdentifierKey: peripheralRestoreIdentifier])
+//        EIDKeyManager.setup(secret: <#T##String#>, k: <#T##Int#>, clockOffSet: <#T##Int#>)
         
-        advertisingStatusLabel.text = "Advertising..."
-        
+        let newEID = EIDKeyManager.generateEIDString()
+        print(newEID ?? " Failed to generate EID")
+        advertisingStatusLabel.text = newEID
     }
     
-    @IBAction func actionStopAdvertising(_ sender: Any) {
-        peripheral?.stopAdvertising()
-        peripheral = nil
-        broadcaster = nil
-        advertisingStatusLabel.text = "Turned Off"
-    }
     
     @IBAction func actionStartScanning(_ sender: Any) {
         if broadcaster == nil {
-            broadcaster = BLEBroadcaster(idGenerator: broadcastIdGenerator!)
+            broadcaster = BLEBroadcaster()
             peripheral = CBPeripheralManager(delegate: broadcaster,
                                              queue: queue,
                                              options: [CBPeripheralManagerOptionRestoreIdentifierKey: peripheralRestoreIdentifier])
@@ -87,11 +74,8 @@ class ViewController: UIViewController {
                                              CBCentralManagerOptionRestoreIdentifierKey: centralRestoreIdentifier,
                                              CBCentralManagerOptionShowPowerAlertKey: NSNumber(false)])
         
-        scanner?.delegate = self
         scanner?.stateDelegate = self.stateObserver
         scanningStatusLabel.text = "Scanning..."
-        
-//        changeIdentityTimer = Timer.scheduledTimer(timeInterval: 100, target: self, selector: #selector(updateBroadcastID), userInfo: nil, repeats: true)
     }
     
     @IBAction func actionStopScanning(_ sender: Any) {
@@ -103,23 +87,6 @@ class ViewController: UIViewController {
     
     @objc private func updateBroadcastID() {
         broadcaster?.updateIdentity()
-    }
-}
-
-extension ViewController: BLEScannerDelegate {
-    func didReadAdvertisementData(txPower: Int?, uuids: Int?, totalMessages: Int) {
-        DispatchQueue.main.async {
-            self.txLabel.text = txPower?.description
-            self.uuidsLabel.text = uuids?.description
-            self.serviceDataLabel.text = totalMessages.description
-            print(totalMessages, Date())
-        }
-    }
-    
-    func updatePConnectedPeripherals(to number: Int) {
-        DispatchQueue.main.async {
-            self.scanningStatusLabel.text = "Connected peripherals \(number)"
-        }
     }
 }
 

@@ -19,28 +19,14 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xkf-6B-EV7">
                                 <rect key="frame" x="30" y="252" width="315" height="130"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T39-Uo-5yJ">
-                                        <rect key="frame" x="235" y="70" width="60" height="40"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="40" id="Bar-uU-xZr"/>
-                                            <constraint firstAttribute="width" constant="60" id="HlI-NB-v5f"/>
-                                        </constraints>
-                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
-                                        <state key="normal" title="Stop">
-                                            <color key="titleColor" red="0.84313725490000002" green="0.22352941179999999" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="actionStopAdvertising:" destination="BYZ-38-t0r" eventType="touchUpInside" id="NRM-Pu-ZTK"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yUc-Xd-U4a">
-                                        <rect key="frame" x="20" y="70" width="60" height="40"/>
+                                        <rect key="frame" x="20" y="70" width="120" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="40" id="UGh-qi-0jJ"/>
-                                            <constraint firstAttribute="width" constant="60" id="m5X-BS-zvG"/>
+                                            <constraint firstAttribute="width" constant="120" id="m5X-BS-zvG"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
-                                        <state key="normal" title="Start">
+                                        <state key="normal" title="Generate">
                                             <color key="titleColor" red="0.84313725490000002" green="0.22352941179999999" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
@@ -53,8 +39,8 @@
                                         <color key="textColor" red="0.97254901959999995" green="0.97647058819999999" blue="0.98431372549999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Advertiser" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O3j-gI-cZh">
-                                        <rect key="frame" x="16" y="12" width="66" height="19"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="EID Generator" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O3j-gI-cZh">
+                                        <rect key="frame" x="16" y="12" width="93" height="19"/>
                                         <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="16"/>
                                         <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -66,11 +52,9 @@
                                     <constraint firstItem="9BU-IZ-TfE" firstAttribute="top" secondItem="Xkf-6B-EV7" secondAttribute="top" constant="45" id="7YO-Ly-NlJ"/>
                                     <constraint firstItem="O3j-gI-cZh" firstAttribute="leading" secondItem="Xkf-6B-EV7" secondAttribute="leading" constant="16" id="BFv-eZ-Z2s"/>
                                     <constraint firstItem="yUc-Xd-U4a" firstAttribute="leading" secondItem="Xkf-6B-EV7" secondAttribute="leading" constant="20" id="CKx-wy-ONk"/>
-                                    <constraint firstAttribute="bottom" secondItem="T39-Uo-5yJ" secondAttribute="bottom" constant="20" id="GHs-at-O55"/>
                                     <constraint firstItem="9BU-IZ-TfE" firstAttribute="centerX" secondItem="Xkf-6B-EV7" secondAttribute="centerX" id="I3w-7m-W2D"/>
                                     <constraint firstItem="O3j-gI-cZh" firstAttribute="top" secondItem="Xkf-6B-EV7" secondAttribute="top" constant="12" id="JcK-fb-cSS"/>
                                     <constraint firstAttribute="height" constant="130" id="PEc-0A-QMM"/>
-                                    <constraint firstAttribute="trailing" secondItem="T39-Uo-5yJ" secondAttribute="trailing" constant="20" id="Q3b-VU-nIl"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -115,8 +99,8 @@
                                         <color key="textColor" red="0.97254901959999995" green="0.97647058819999999" blue="0.98431372549999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scanner" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="q2k-bi-t9P">
-                                        <rect key="frame" x="16" y="12" width="56" height="19"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Contact Module" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="q2k-bi-t9P">
+                                        <rect key="frame" x="16" y="12" width="107" height="19"/>
                                         <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="16"/>
                                         <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                         <nil key="highlightedColor"/>
